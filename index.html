@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Motor Skills Adventure — Activities</title>
+
+  <!-- Minimal starter styles: pastel, rounded, shadowed, kid-friendly -->
+  <style>
+    :root{
+      --bg:#FBF2E6;
+      --card:#FFF6F1;
+      --accent:#CDEED6; /* mint */
+      --accent-2:#F6C6D0; /* pink */
+      --accent-3:#BEE7F6; /* blue */
+      --outline:#5A4032;
+      --soft-shadow: 6px 6px 0 rgba(90,64,50,0.12);
+      --radius:16px;
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color:var(--outline);
+    }
+
+    html,body { height:100%; margin:0; background:var(--bg); -webkit-font-smoothing:antialiased; }
+    .container{
+      max-width:1150px;
+      margin:28px auto;
+      padding:20px;
+    }
+
+    header.app-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .logo {
+      width:84px;
+      height:84px;
+      border-radius:14px;
+      background:linear-gradient(180deg,#fff,#F5EDE7);
+      box-shadow: var(--soft-shadow);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:6px solid rgba(90,64,50,0.02);
+      font-weight:700;
+      font-size:18px;
+    }
+    .title{
+      font-size:24px;
+      font-weight:800;
+      text-shadow: 1px 1px 0 rgba(255,255,255,0.6);
+    }
+
+    .controls {
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .btn {
+      background:var(--card);
+      border-radius:12px;
+      padding:8px 12px;
+      box-shadow: var(--soft-shadow);
+      border:2px solid rgba(90,64,50,0.08);
+      cursor:pointer;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      font-weight:600;
+    }
+    .heart {
+      background:linear-gradient(180deg,#FFD9E0,#FFD1D9);
+      border-radius:14px;
+      padding:8px 12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      box-shadow: var(--soft-shadow);
+    }
+
+    main.card {
+      background:var(--card);
+      border-radius:20px;
+      padding:22px;
+      box-shadow: var(--soft-shadow);
+      border:4px solid rgba(90,64,50,0.03);
+    }
+
+    .activity-grid{
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:20px;
+    }
+
+    /* Left: activity content area */
+    .activity-area{
+      min-height:420px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    /* Tabs for activities */
+    .tabs{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .tab{
+      padding:10px 14px;
+      border-radius:12px;
+      background:var(--accent);
+      cursor:pointer;
+      box-shadow: 4px 4px 0 rgba(90,64,50,0.08);
+      border:3px solid rgba(90,64,50,0.04);
+      font-weight:700;
+    }
+    .tab[aria-selected="true"]{
+      transform:translateY(-4px);
+      box-shadow: 8px 8px 0 rgba(90,64,50,0.08);
+    }
+
+    .activity-panel{
+      background: #fff;
+      border:3px solid rgba(90,64,50,0.03);
+      border-radius:14px;
+      padding:18px;
+      flex:1;
+      display:none;
+      min-height:320px;
+    }
+    .activity-panel.active { display:block; }
+
+    /* Right column: quick controls / palette / scoring */
+    .side-panel{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+    .score-card, .palette, .profile-card{
+      background:var(--card);
+      padding:12px;
+      border-radius:12px;
+      box-shadow: var(--soft-shadow);
+      border:2px solid rgba(90,64,50,0.03);
+    }
+
+    .palette .colors{
+      display:grid;
+      grid-template-columns: repeat(2,1fr);
+      gap:8px;
+    }
+    .color-swatch{
+      height:44px;
+      border-radius:10px;
+      border:4px solid rgba(90,64,50,0.04);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: 3px 3px 0 rgba(90,64,50,0.06);
+    }
+
+    /* Canvas area */
+    .draw-canvas{
+      width:100%;
+      height:320px;
+      background:#fff;
+      border:6px solid rgba(90,64,50,0.04);
+      border-radius:12px;
+    }
+
+    /* Puzzle board */
+    .puzzle-board{
+      display:grid;
+      grid-template-columns: repeat(2,1fr);
+      gap:12px;
+    }
+    .puzzle-slot, .puzzle-piece{
+      height:100px;
+      background:linear-gradient(180deg,#fff,#F4F1EE);
+      border-radius:12px;
+      border:4px solid rgba(90,64,50,0.04);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      box-shadow: 3px 3px 0 rgba(90,64,50,0.06);
+      cursor:grab;
+    }
+
+    /* Shape sorting */
+    .shape-row{
+      display:flex;
+      gap:12px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+    .shape-card{
+      width:84px;
+      height:84px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+      box-shadow: 3px 3px 0 rgba(90,64,50,0.06);
+      cursor:pointer;
+      background:linear-gradient(180deg,#fff,#F9F6F3);
+    }
+
+    /* Responsive tweaks */
+    @media (max-width:1000px){
+      .activity-grid{ grid-template-columns: 1fr; }
+      .side-panel{ flex-direction:row; overflow-x:auto; }
+      .side-panel > * { min-width:220px; flex:1 0 auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="app-header" role="banner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">MSA</div>
+        <div>
+          <div class="title">Motor Skills Adventure</div>
+          <div style="font-size:12px; color:rgba(90,64,50,0.7)">Choose an activity to practice fine motor skills</div>
+        </div>
+      </div>
+
+      <div class="controls" role="navigation" aria-label="Global controls">
+        <button class="btn" id="homeBtn" title="Home">🏠 Home</button>
+        <button class="btn" id="profileBtn" title="Profile">⚙️ Profile</button>
+        <div class="heart" aria-live="polite" aria-atomic="true">
+          <span id="heartsCount" style="font-weight:800">100</span>
+          <span style="font-size:14px">💗</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="card" role="main">
+      <h2 style="margin-top:0; margin-bottom:10px; text-align:center;">Choose an Activity!</h2>
+
+      <div class="activity-grid">
+        <!-- left: activity UI -->
+        <section class="activity-area" aria-labelledby="activityTabsLabel">
+          <div id="activityTabsLabel" style="position:absolute; left:-9999px; height:1px; overflow:hidden;">Activity tabs</div>
+
+          <div class="tabs" role="tablist" aria-label="Activities">
+            <button class="tab" role="tab" aria-selected="true" aria-controls="panel-coloring" id="tab-coloring">Coloring</button>
+            <button class="tab" role="tab" aria-selected="false" aria-controls="panel-puzzle" id="tab-puzzle">Puzzles</button>
+            <button class="tab" role="tab" aria-selected="false" aria-controls="panel-shapes" id="tab-shapes">Shape Sorting</button>
+            <button class="tab" role="tab" aria-selected="false" aria-controls="panel-draw" id="tab-draw">Drawing</button>
+          </div>
+
+          <!-- Activity panels -->
+          <div id="panel-coloring" class="activity-panel active" role="tabpanel" aria-labelledby="tab-coloring">
+            <h3>Coloring Time!</h3>
+            <p style="margin-top:6px; color:rgba(90,64,50,0.7)">Tap a color on the right, then tap the picture to color.</p>
+            <div style="display:flex; gap:12px; align-items:flex-start; margin-top:10px;">
+              <div style="flex:1; min-height:260px; background:linear-gradient(180deg,#fff,#F8F6F4); border-radius:12px; border:4px solid rgba(90,64,50,0.02); display:flex; align-items:center; justify-content:center;">
+                <!-- Placeholder for SVG or coloring image -->
+                <svg width="220" height="160" viewBox="0 0 220 160" role="img" aria-label="Coloring picture: butterfly">
+                  <rect fill="none" width="220" height="160"/>
+                  <!-- simple outline -->
+                  <path d="M110 40 C85 40,60 70,80 95 C60 115,85 135,110 115 C135 135,160 115,140 95 C160 70,135 40,110 40 Z" stroke="#5A4032" stroke-width="4" fill="none" stroke-linejoin="round" stroke-linecap="round"></path>
+                </svg>
+              </div>
+
+              <aside style="width:200px;">
+                <div class="palette">
+                  <strong>Pick a color:</strong>
+                  <div class="colors" role="list" aria-label="Color palette">
+                    <div tabindex="0" class="color-swatch" style="background:#F6C6D0" data-color="#F6C6D0" title="Pink"></div>
+                    <div tabindex="0" class="color-swatch" style="background:#BEE7F6" data-color="#BEE7F6" title="Blue"></div>
+                    <div tabindex="0" class="color-swatch" style="background:#CDEED6" data-color="#CDEED6" title="Mint"></div>
+                    <div tabindex="0" class="color-swatch" style="background:#FFE9B4" data-color="#FFE9B4" title="Yellow"></div>
+                  </div>
+                </div>
+                <div style="height:12px"></div>
+                <div class="score-card" aria-live="polite">Completed: <strong id="colorComplete">0</strong></div>
+              </aside>
+            </div>
+          </div>
+
+          <div id="panel-puzzle" class="activity-panel" role="tabpanel" aria-labelledby="tab-puzzle">
+            <h3>Puzzle Time!</h3>
+            <p style="color:rgba(90,64,50,0.7)">Drag the pieces to the board to complete the picture.</p>
+
+            <div style="display:flex; gap:12px; margin-top:10px; align-items:flex-start;">
+              <div style="flex:1;">
+                <div class="puzzle-board" aria-label="Puzzle board">
+                  <div class="puzzle-slot" data-slot="1" aria-label="slot 1"></div>
+                  <div class="puzzle-slot" data-slot="2" aria-label="slot 2"></div>
+                  <div class="puzzle-slot" data-slot="3" aria-label="slot 3"></div>
+                  <div class="puzzle-slot" data-slot="4" aria-label="slot 4"></div>
+                </div>
+              </div>
+
+              <aside style="width:200px;">
+                <div style="display:grid; gap:8px;">
+                  <div class="puzzle-piece" draggable="true" data-piece="2">2</div>
+                  <div class="puzzle-piece" draggable="true" data-piece="4">4</div>
+                  <div class="puzzle-piece" draggable="true" data-piece="1">1</div>
+                  <div class="puzzle-piece" draggable="true" data-piece="3">3</div>
+                </div>
+                <div style="height:12px;"></div>
+                <div class="score-card">Time: <strong id="puzzleTimer">00:00</strong></div>
+              </aside>
+            </div>
+          </div>
+
+          <div id="panel-shapes" class="activity-panel" role="tabpanel" aria-labelledby="tab-shapes">
+            <h3>Shape Sorting!</h3>
+            <p style="color:rgba(90,64,50,0.7)">Find the target shape and tap the matching shape from the choices below.</p>
+
+            <div style="margin-top:8px;">
+              <div style="display:flex; align-items:center; gap:12px; justify-content:center;">
+                <div style="width:140px; height:140px; display:flex; align-items:center; justify-content:center; border-radius:12px; background:linear-gradient(180deg,#fff,#F6F6F4); border:6px solid rgba(90,64,50,0.04); font-size:28px;" id="targetShape">🔴</div>
+                <div style="font-weight:700; color:rgba(90,64,50,0.7)">Score: <span id="shapeScore">0</span></div>
+              </div>
+
+              <div class="shape-row" role="group" aria-label="shape choices" style="justify-content:center; margin-top:18px;">
+                <button class="shape-card" data-shape="circle" aria-pressed="false">🔴</button>
+                <button class="shape-card" data-shape="triangle" aria-pressed="false">🔺</button>
+                <button class="shape-card" data-shape="square" aria-pressed="false">⬜</button>
+                <button class="shape-card" data-shape="star" aria-pressed="false">⭐</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="panel-draw" class="activity-panel" role="tabpanel" aria-labelledby="tab-draw">
+            <h3>Drawing Time!</h3>
+            <p style="color:rgba(90,64,50,0.7)">Use your finger or mouse to draw the current shape.</p>
+
+            <div style="display:flex; gap:12px; margin-top:10px; align-items:flex-start;">
+              <div style="flex:1;">
+                <canvas id="drawCanvas" class="draw-canvas" width="800" height="400" aria-label="Drawing canvas"></canvas>
+              </div>
+              <aside style="width:200px;">
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                  <div style="display:flex; gap:8px; align-items:center;">
+                    <div style="width:28px; height:28px; border-radius:50%; background:#F6C6D0" data-c="#F6C6D0" class="draw-color" tabindex="0"></div>
+                    <div style="width:28px; height:28px; border-radius:50%; background:#BEE7F6" data-c="#BEE7F6" class="draw-color" tabindex="0"></div>
+                    <div style="width:28px; height:28px; border-radius:50%; background:#CDEED6" data-c="#CDEED6" class="draw-color" tabindex="0"></div>
+                  </div>
+                  <button class="btn" id="clearBtn">Clear</button>
+                  <div class="score-card">Next shape: <strong id="nextShape">Circle</strong></div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <!-- right: side-panel: quick info, profile, small settings -->
+        <aside class="side-panel" aria-label="Right controls">
+          <div class="profile-card" role="region" aria-label="Your profile">
+            <div style="display:flex; gap:12px; align-items:center;">
+              <div style="width:64px;height:64px;border-radius:12px;background:linear-gradient(180deg,#fff,#F4F1EE);box-shadow:var(--soft-shadow); display:flex;align-items:center;justify-content:center;">👦</div>
+              <div>
+                <div style="font-weight:800">Player Name</div>
+                <div style="font-size:12px;color:rgba(90,64,50,0.6)">Level 1</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="score-card" role="status" aria-live="polite">
+            <div style="font-weight:800">Hearts: <span id="heartsCount2">100</span></div>
+            <div style="font-size:12px;color:rgba(90,64,50,0.6)">Earn hearts by completing activities</div>
+          </div>
+
+          <div class="score-card">
+            <strong>Quick tips</strong>
+            <ul style="margin:8px 0 0 16px; color:rgba(90,64,50,0.7)">
+              <li>Tap or drag with finger or mouse</li>
+              <li>Use large motions for gross motor practice</li>
+              <li>Encourage correct shapes & colors</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Starter JS: tab switching, hearts counter, basic interactions (you'll expand these) -->
+  <script>
+    // Tab switching (keyboard accessible)
+    const tabs = document.querySelectorAll('[role="tab"]');
+    const panels = document.querySelectorAll('.activity-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => selectTab(tab));
+      tab.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
+          e.preventDefault();
+          const idx = Array.from(tabs).indexOf(tab);
+          const next = (e.key === 'ArrowRight') ? (idx+1) % tabs.length : (idx-1 + tabs.length) % tabs.length;
+          tabs[next].focus();
+          selectTab(tabs[next]);
+        }
+      });
+    });
+
+    function selectTab(tab){
+      tabs.forEach(t => t.setAttribute('aria-selected','false'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.setAttribute('aria-selected','true');
+      document.getElementById(tab.getAttribute('aria-controls')).classList.add('active');
+    }
+
+    // hearts counter example
+    const heartsCountElems = document.querySelectorAll('#heartsCount, #heartsCount2');
+    let hearts = 100;
+    function updateHearts(delta){
+      hearts = Math.max(0, hearts + delta);
+      heartsCountElems.forEach(el => el.textContent = hearts);
+    }
+
+    // Example: increment hearts when coloring complete (placeholder logic)
+    document.getElementById('colorComplete').textContent = 0;
+
+    // Shape sorting: simple target/choice logic
+    const shapes = ['circle','triangle','square','star'];
+    const targetEl = document.getElementById('targetShape');
+    const shapeScoreEl = document.getElementById('shapeScore');
+    let shapeScore = 0;
+
+    function pickTarget(){
+      const t = shapes[Math.floor(Math.random()*shapes.length)];
+      // basic emoji mapping
+      const map = {circle:'🔴', triangle:'🔺', square:'⬜', star:'⭐'};
+      targetEl.textContent = map[t] || '🔴';
+      targetEl.dataset.target = t;
+    }
+    pickTarget();
+
+    document.querySelectorAll('.shape-card').forEach(btn=>{
+      btn.addEventListener('click', () => {
+        const picked = btn.dataset.shape;
+        if(picked === targetEl.dataset.target){
+          shapeScore++;
+          shapeScoreEl.textContent = shapeScore;
+          updateHearts(+5);
+          pickTarget();
+        } else {
+          updateHearts(-3);
+          // small feedback
+          btn.animate([{transform:'scale(1)'},{transform:'scale(0.95)'},{transform:'scale(1)'}],{duration:160});
+        }
+      });
+    });
+
+    // Drawing basic: simple pointer drawing
+    (function initDrawing(){
+      const canvas = document.getElementById('drawCanvas');
+      const ctx = canvas.getContext('2d');
+      let painting = false;
+      let color = '#BEE7F6';
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 8;
+
+      function start(e){
+        painting = true;
+        ctx.beginPath();
+        ctx.moveTo(getX(e), getY(e));
+      }
+      function draw(e){
+        if(!painting) return;
+        ctx.lineTo(getX(e), getY(e));
+        ctx.strokeStyle = color;
+        ctx.stroke();
+      }
+      function stop(){
+        painting = false;
+      }
+      function getX(e){ const r = canvas.getBoundingClientRect(); return ((e.touches ? e.touches[0].clientX : e.clientX) - r.left) * (canvas.width / r.width); }
+      function getY(e){ const r = canvas.getBoundingClientRect(); return ((e.touches ? e.touches[0].clientY : e.clientY) - r.top) * (canvas.height / r.height); }
+
+      ['mousedown','touchstart'].forEach(ev => canvas.addEventListener(ev,start));
+      ['mousemove','touchmove'].forEach(ev => canvas.addEventListener(ev,draw));
+      ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev => canvas.addEventListener(ev,stop));
+
+      document.querySelectorAll('.draw-color').forEach(c => {
+        c.addEventListener('click', () => {
+          color = c.dataset.c;
+        });
+      });
+      document.getElementById('clearBtn').addEventListener('click', () => {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+      });
+    })();
+
+    // Puzzle: simple drag & drop scaffolding (extensible)
+    document.querySelectorAll('.puzzle-piece').forEach(piece => {
+      piece.addEventListener('dragstart', ev => {
+        ev.dataTransfer.setData('text/plain', piece.dataset.piece);
+      });
+    });
+    document.querySelectorAll('.puzzle-slot').forEach(slot => {
+      slot.addEventListener('dragover', ev => ev.preventDefault());
+      slot.addEventListener('drop', ev => {
+        ev.preventDefault();
+        const p = ev.dataTransfer.getData('text/plain');
+        // place text/number in slot as basic behaviour
+        slot.textContent = p;
+        slot.style.background = 'linear-gradient(180deg,#F6F6F4,#fff)';
+        updateHearts(+2);
+      });
+    });
+
+    // Color swatches: simple sample behaviour (non-destructive)
+    document.querySelectorAll('.color-swatch').forEach(s => {
+      s.addEventListener('click', () => {
+        // in a real coloring activity you'd set the chosen color
+        document.querySelectorAll('.color-swatch').forEach(x => x.style.outline = '');
+        s.style.outline = '3px solid rgba(90,64,50,0.08)';
+      });
+      s.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' ') s.click(); });
+    });
+
+    // Hook up nav buttons (stubs)
+    document.getElementById('homeBtn').addEventListener('click', () => alert('Navigate to Home (implement routing)'));
+    document.getElementById('profileBtn').addEventListener('click', () => alert('Open Profile (implement routing)'));
+
+    // Keep hearts synced
+    function syncHeartsUI(){ heartsCountElems.forEach(el => el.textContent = hearts); }
+    syncHeartsUI();
+  </script>
+</body>
+</html>
