@@ -3,69 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Choose an Activity</title>
+  <title> Motor Skills Adventure</title>
+  <link rel="stylesheet" href="activities.css">
 </head>
 <body>
 
-  
-<div class="activities">
-  <div class="window">
+  <!-- HEADER -->
+  <header>
+    <div class="top-buttons">
+      <button class="icon-btn">🏠</button>
+      <button class="icon-btn">⚙️</button>
+    </div>
+    <div class="hearts">
+      ❤️ 100
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main>
     <h1>Choose an Activity!</h1>
-    <button>Coloring</button>
-    <button>Puzzles</button>
-    <button>Shape Sorting</button>
-     <button>Drawing</button>
-  </div>
-</div>
-<style>
-  body {
-    background-color: #fff6ea;
-    font-family: 'Poppins', sans-serif;
-    text-align: center;
-  }
 
-  h1 {
-    color: #5a4032;
-  }
- .activities {
-    display:grid;
-    gap: 20px;
-    height: 100vh;
-    width: 100vw;
-    place-items: center;
-    
-  }
- 
-  .window {
-    background-color: #e6c6c6;
-    border-radius: 20px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    padding: 30px;
-    display: grid;
-    
-    gap: 20px;
-    justify-items: center;
-  }
+    <div class="activity-grid">
+      <div class="activity-card pink">
+        🎨 <h2>Coloring</h2>
+        <p>Color beautiful pictures!</p>
+      </div>
+      <div class="activity-card blue">
+        🧩 <h2>Puzzles</h2>
+        <p>Solve fun puzzles!</p>
+      </div>
+      <div class="activity-card green">
+        🔺 <h2>Shape Sorting</h2>
+        <p>Match the shapes!</p>
+      </div>
+      <div class="activity-card pink2">
+        ✏️ <h2>Drawing</h2>
+        <p>Draw amazing shapes!</p>
+      </div>
+    </div>
 
-  button {
-    padding: 15px;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
-  }
-
-
-  button:nth-child(1) { background-color: #F6C6D0; } /* pink */
-  button:nth-child(2) { background-color: #BEE7F6; } /* blue */
-  button:nth-child(3) { background-color: #CDEED6; } /* green */
-  button:nth-child(4) { background-color: #FFE9B4; } /* yellow */
-
-  button:hover {
-    transform: scale(1.05);
-  }
-</style>
+    <p class="coming-soon">More coming soon!</p>
+  </main>
 
 </body>
 </html>
