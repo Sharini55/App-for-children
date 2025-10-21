@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drawing Time!</title>
+  <link rel="stylesheet" href="drawing.css">
+</head>
+<body>
+
+  <header>
+    <button class="icon-btn">🏠</button>
+    <h1>Drawing Time!</h1>
+    <div class="hearts">❤️ 100</div>
+  </header>
+
+  <main class="drawing-layout">
+    <!-- Left panel: colors and button -->
+    <section class="tools">
+      <h3>Colors</h3>
+      <div class="color-palette">
+        <div class="color pink"></div>
+        <div class="color blue"></div>
+        <div class="color green"></div>
+        <div class="color yellow"></div>
+        <div class="color brown"></div>
+      </div>
+      <h3>Next</h3>
+      <button id="nextShapeBtn">Next Shape!</button>
+    </section>
+
+    <!-- Right panel: drawing area -->
+    <section class="canvas-area">
+      <h3 id="shapeInstruction">Draw a big circle!</h3>
+      <canvas id="drawCanvas" width="600" height="350"></canvas>
+    </section>
+  </main>
+
+  <script src="drawing.js"></script>
+</body>
+</html>
