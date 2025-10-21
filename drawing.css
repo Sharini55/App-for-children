@@ -89,6 +89,24 @@ html, body {
   box-shadow: 3px 3px 0 rgba(90, 64, 50, 0.15);
 }
 
+#clearCanvasBtn {
+    background-color: #f6c6d0;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 3px 3px 0 rgba(90, 64, 50, 0.15);
+    }
+    
+    .button-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* vertical spacing */
+  margin-top: 10px;
+}
+
+
 /* --- RIGHT PANEL --- */
 .canvas-area {
   background-color: #fff6ea;

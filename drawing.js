@@ -73,5 +73,9 @@ document.querySelectorAll('.color').forEach(c => {
 
 // Next shape button
 document.getElementById('nextShapeBtn').addEventListener('click', () => {
-  document.getElementById('shapeInstruction').textContent = 'Draw a big square!';
+  document.getElementById('shapeInstruction').textContent = 'Draw a big square!'; 
+});
+// Clear canvas button
+document.getElementById('clearCanvasBtn').addEventListener('click', () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
