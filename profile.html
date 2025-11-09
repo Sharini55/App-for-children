@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile Page</title>
+  <link rel="stylesheet" href="profile.css" />
+</head>
+<body>
+  <header class="navbar">
+    <button class="nav-btn" id="backBtn">⬅️</button>
+    <div class="hearts">❤️ x 12</div>
+    <div class="nav-right">
+      <button class="nav-btn" id="homeBtn">🏠</button>
+      <button class="nav-btn" id="settingsBtn">⚙️</button>
+    </div>
+  </header>
+
+ <main class="profile-container">
+  <h1 class="profile-title">My Profile</h1>
+
+  <div class="profile-grid">
+    <div class="profile-box pink" id="editBox">
+      <span class="icon">👤</span>
+      <h2>Edit Profile</h2>
+    </div>
+
+    <div class="profile-box blue" id="achievementsBox">
+      <span class="icon">🏆</span>
+      <h2>Achievements</h2>
+    </div>
+  </div>
+
+<div class="profile-box green wide" id="progressBox">
+  <h2>My Progress</h2>
+
+  <div class="star-progress">
+    <svg class="star-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,5 61,38 95,38 67,59 77,91 50,72 23,91 33,59 5,38 39,38"
+               fill="url(#barGradient)"
+               stroke="#7B4B2A"
+               stroke-width="5"
+               stroke-linejoin="round"/>
+      <defs>
+        <linearGradient id="barGradient" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stop-color="#F7D1A4"/>
+          <stop offset="100%" stop-color="#E4A565"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+</main>
+
+
+  <script src="profile.js"></script>
+</body>
+</html>

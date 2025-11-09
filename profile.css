@@ -1,0 +1,303 @@
+/* profile.css */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700&display=swap');
+
+body {
+  background-color: #F9E3C9; /* warm peach */
+  font-family: 'Nunito', sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #7B4B2A;
+}
+
+/* NAVIGATION BAR */
+.navbar {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 35px;
+  box-sizing: border-box;
+}
+
+/* LEFT SIDE (back button) */
+#backBtn {
+  position: absolute;
+  top: 25px;
+  left: 30px;
+}
+
+/* RIGHT SIDE (home + settings buttons) */
+.nav-right {
+  position: absolute;
+  top: 25px;
+  right: 30px;
+  display: flex;
+  gap: 12px;
+}
+
+/* HEARTS (centered top) */
+.hearts {
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #F8BFC1;
+  border: 3px solid #7B4B2A;
+  border-radius: 16px;
+  padding: 8px 18px;
+  font-size: 19px;
+  font-weight: 700;
+  box-shadow: 4px 4px 0 #7B4B2A;
+}
+
+/* BUTTON STYLING */
+.nav-btn {
+  background-color: #FCE7A1;
+  border: 3px solid #7B4B2A;
+  border-radius: 14px;
+  padding: 12px 15px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #7B4B2A;
+  transition: transform 0.15s ease-in-out;
+}
+
+.nav-btn:hover {
+  transform: scale(1.08);
+}
+
+/* PROFILE CONTAINER */
+.profile-container {
+  background-color: #FFEFE2;
+  border: 4px solid #7B4B2A;
+  border-radius: 28px;
+  box-shadow: 7px 7px 0 #7B4B2A;
+  padding: 60px 80px;
+  margin-top: 120px; /* pushes it down to match top spacing from screenshot */
+  text-align: center;
+}
+
+.profile-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #7B4B2A;
+  margin-bottom: 50px;
+}
+
+/* GRID LAYOUT */
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 250px);
+  grid-gap: 40px 50px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+/* BOXES */
+.profile-box {
+  height: 190px;
+  width: 250px;
+  border: 4px solid #7B4B2A;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #7B4B2A;
+  box-shadow: 6px 6px 0 #7B4B2A;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  padding-top: 16px;
+}
+
+.profile-box:hover {
+  transform: scale(1.08);
+  box-shadow: 8px 8px 0 #7B4B2A;
+}
+
+/* WIDE BOX (bottom one) */
+.wide {
+  width: 560px; /* extends across both top boxes */
+  margin: 0 auto;
+}
+
+
+/* COLOR THEMES */
+.pink {
+  background-color: #F8BFC1;
+}
+
+.blue {
+  background-color: #B6D8F2;
+}
+
+.green {
+  background-color: #B9E4C9;
+}
+
+.yellow {
+  background-color: #FFE7A8;
+}
+
+/* ICON STYLE */
+.icon {
+  font-size: 54px;
+  margin-top: 18px;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+
+/* --- CHROME DINO STYLE (final polished version) --- */
+
+.runner-scene {
+  position: relative;
+  width: 520px;
+  height: 120px;
+  margin: 25px auto 0;
+  background: #B9E4C9; /* soft mint sky */
+  overflow: hidden;
+  border-radius: 10px;
+  border: 3px solid #7B4B2A;
+}
+
+/* GROUND - long scrolling band */
+.ground-line {
+  position: absolute;
+  bottom: 0;
+  width: 200%;
+  height: 22px;
+  background: #FCE9D8;
+  border-top: 3px solid #7B4B2A;
+  animation: scrollGround 2.2s linear infinite;
+}
+
+@keyframes scrollGround {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* RUNNER - simplified pixel character */
+.runner {
+  position: absolute;
+  bottom: 22px;
+  left: 80px;
+  width: 20px;
+  height: 24px;
+  background: #7B4B2A;
+  border-radius: 2px;
+  animation: jumpLoop 3.5s ease-in-out infinite, runBounce 0.35s steps(2) infinite;
+  z-index: 3;
+}
+
+/* bounce effect */
+@keyframes runBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(1.5px); }
+}
+
+/* jump motion */
+@keyframes jumpLoop {
+  0%, 15%, 100% { bottom: 22px; }
+  7% { bottom: 70px; }
+}
+
+/* OBSTACLES */
+.obstacle {
+  position: absolute;
+  bottom: 22px;
+  width: 12px;
+  height: 28px;
+  background: #7B4B2A;
+  border-radius: 2px;
+  animation: moveObstacle 2.5s linear infinite;
+  z-index: 2;
+}
+
+.obstacle.second {
+  animation-delay: 1.25s;
+}
+
+@keyframes moveObstacle {
+  0% { right: -30px; }
+  100% { right: 560px; }
+}
+/* --- Clean, Sharp, Matching Star Progress Bar --- */
+
+/* --- Adjusted alignment so progress bar sits neatly inside the box --- */
+
+.star-progress {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 15px;   /* was 30px — less vertical gap */
+  transform: translateY(-10px); /* gently lift star + bar upward */
+}
+
+
+/* STAR SVG (no wavy fill) */
+.star-icon {
+  position: absolute;
+  left: 22px; /* keep overlap */
+  top: 50%;
+  transform: translateY(-60%); /* was -50%, move up slightly */
+  width: 90px;
+  height: 90px;
+  filter: drop-shadow(3px 3px 0 #7B4B2A);
+  z-index: 3;
+   animation: starGlow 2.5s ease-in-out infinite;
+}
+
+
+/* PROGRESS BAR */
+.progress-bar {
+  position: relative;
+  width: 460px;
+  height: 38px;
+  background: #FCE9D8;
+  border: 4px solid #7B4B2A;
+  border-radius: 30px;
+  box-shadow: inset 3px 3px 0 #E8C9AF, 3px 3px 0 #7B4B2A;
+  overflow: hidden;
+  margin-left: 65px;
+}
+
+/* FILL */
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #F7D1A4 0%, #E4A565 100%);
+  border-right: 4px solid #7B4B2A;
+  border-radius: 30px 0 0 30px;
+  box-shadow: inset 0 0 8px rgba(255,255,255,0.6);
+  animation: fillBar 2.8s ease-out forwards;
+}
+
+@keyframes fillBar {
+  from { width: 0%; }
+  to { width: 65%; }
+}
+
+/* Shine animation */
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -80px;
+  width: 80px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.35);
+  transform: skewX(-25deg);
+  animation: shineMove 3s linear infinite;
+}
+
+@keyframes shineMove {
+  0% { left: -80px; }
+  100% { left: 480px; }
+}
