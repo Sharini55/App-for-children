@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Puzzle Time!</title>
+  <link rel="stylesheet" href="puzzles.css" />
+</head>
+<body>
+  <header>
+    <button class="icon-btn">🏠</button>
+    <h1>Puzzle Time!</h1>
+    <div class="hearts">❤️ 100</div>
+  </header>
+
+  <main class="puzzle-layout">
+    <aside class="tools">
+      <h3>Puzzle Controls</h3>
+      <div class="controls">
+        <label for="rows">Rows</label>
+        <select id="rows">
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+        </select>
+
+        <label for="cols">Cols</label>
+        <select id="cols">
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+        </select>
+
+        <button id="shuffleBtn">Shuffle</button>
+        <button id="hintBtn">Show Hint</button>
+        <button id="resetBtn">Reset</button>
+      </div>
+    </aside>
+
+    <section class="puzzle-area">
+      <h3 id="instruction">Drag each piece into the empty shape!</h3>
+
+      <div class="board">
+        <!-- target area with empty slots -->
+        <div id="slots" class="slots"></div>
+
+        <!-- floating pieces container -->
+        <div id="pieces" class="pieces"></div>
+      </div>
+
+      <div id="message" class="message hidden">Great job! You finished the puzzle! ⭐</div>
+    </section>
+  </main>
+
+  <script src="puzzles.js"></script>
+</body>
+</html>
