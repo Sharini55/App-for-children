@@ -62,7 +62,7 @@ h1 {
 html, body {
   height: 100%;
   margin: 0;
-  overflow: hidden; /* prevents scrolling */
+  overflow: hidden;
 }
 
 .color {
@@ -90,22 +90,21 @@ html, body {
 }
 
 #clearCanvasBtn {
-    background-color: #f6c6d0;
-    border: none;
-    padding: 10px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    box-shadow: 3px 3px 0 rgba(90, 64, 50, 0.15);
-    }
-    
-    .button-row {
-  display: flex;
-  flex-direction: column;
-  gap: 12px; /* vertical spacing */
-  margin-top: 10px;
+  background-color: #f6c6d0;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 3px 3px 0 rgba(90, 64, 50, 0.15);
 }
 
+.button-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
 
 /* --- RIGHT PANEL --- */
 .canvas-area {
@@ -116,11 +115,39 @@ html, body {
   box-shadow: 5px 5px 0 rgba(90, 64, 50, 0.1);
 }
 
-#drawCanvas {
-  background: white;
-  border: 2px solid rgba(90, 64, 50, 0.15);
-  border-radius: 10px;
+/* canvas wrapper and stacked canvases */
+.canvas-wrap {
+  position: relative;
   width: 100%;
-  display: block;
+  max-width: 900px;
   margin: 0 auto;
+  height: 350px; /* default height; will be used to size canvases */
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* guide canvas sits under draw canvas */
+#guideCanvas, #drawCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+#guideCanvas {
+  background: white;
+  border: 2px solid rgba(90, 64, 50, 0.08);
+  z-index: 0;
+}
+
+#drawCanvas {
+  background: transparent; /* transparent so guide shows through */
+  z-index: 1;
+  touch-action: none; /* prevent scrolling when drawing on touch */
+  border-radius: 10px;
 }
