@@ -67,11 +67,12 @@ choiceBtns.forEach(btn => {
 
 
 document.querySelector(".nav-home").addEventListener("click", () => {
-  window.location.href = "home.html";   
+  window.location.href = "index.html";   
 });
 
 document.querySelector(".nav-settings").addEventListener("click", () => {
   window.location.href = "profile.html";
 });
+
 
 pickRandomTarget();
