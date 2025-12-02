@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shape Sorting – Motor Skills Adventure</title>
+
+  <link rel="stylesheet" href="shapeSorting.css">
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="bg-blob bg-top"></div>
+    <div class="bg-blob bg-bottom"></div>
+
+
+    <div class="top-left-buttons">
+     
+      <button class="nav-btn nav-home" aria-label="Home">
+        🏠
+      </button>
+      <button class="nav-btn nav-settings" aria-label="Settings">
+        ⚙
+      </button>
+    </div>
+
+
+    <div class="hearts-pill">
+      <span class="heart-icon">♥</span>
+      <span class="heart-text">100</span>
+    </div>
+
+    <main>
+
+      <h1 class="title">Shape Sorting!</h1>
+
+
+      <button class="score-pill" type="button">
+        <span class="score-star">★</span>
+        <span class="score-label">Score: </span>
+        <span id="score">0</span>
+      </button>
+
+
+      <section class="card card-target">
+        <p class="prompt">
+          Find the <span id="target-name">Circle</span>!
+        </p>
+
+        <div class="target-shape-wrapper">
+          <div class="tile tile-large tile-pink">
+            <span id="target-icon" class="shape-icon shape-circle">⭘</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card card-options">
+        <div class="options-row">
+          <button class="choice" data-shape="circle">
+            <div class="tile tile-small tile-pink">
+              <span class="shape-icon shape-circle">⭘</span>
+            </div>
+          </button>
+          <button class="choice" data-shape="triangle">
+            <div class="tile tile-small tile-green">
+              <span class="shape-icon shape-triangle">▲</span>
+            </div>
+          </button>
+          <button class="choice" data-shape="square">
+            <div class="tile tile-small tile-blue">
+              <span class="shape-icon shape-square">▢</span>
+            </div>
+          </button>
+          <button class="choice" data-shape="star">
+            <div class="tile tile-small tile-yellow">
+              <span class="shape-icon shape-star">★</span>
+            </div>
+          </button>
+        </div>
+      </section>
+
+
+      <p id="feedback" class="feedback"></p>
+    </main>
+
+    <footer>
+      <p>© 2023 Motor Skills Adventure. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script src="shapeSorting.js"></script>
+</body>
+</html>

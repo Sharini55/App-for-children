@@ -1,305 +1,354 @@
-// Puzzles: split image into pieces, shuffle, drag & snap.
-// Uses the uploaded image file path provided by you:
-const IMAGE_URL = '/mnt/data/Screenshot 2025-11-25 143120.png';
+// ===============================
+// PUZZLES.JS — Direct-image-slicing version
+// ===============================
 
-// DOM
-const slotsContainer = document.getElementById('slots');
-const piecesContainer = document.getElementById('pieces');
-const shuffleBtn = document.getElementById('shuffleBtn');
-const hintBtn = document.getElementById('hintBtn');
-const resetBtn = document.getElementById('resetBtn');
-const rowsSel = document.getElementById('rows');
-const colsSel = document.getElementById('cols');
-const message = document.getElementById('message');
-const instruction = document.getElementById('instruction');
+let IMAGE_URL = "images1.png";
 
-let rows = parseInt(rowsSel.value, 10);
-let cols = parseInt(colsSel.value, 10);
-let pieces = []; // {el, row, col, correctX, correctY, placed}
-let boardRect = null;
-let pieceSize = {w:0,h:0};
-let dragging = null;
+const imageSelect = document.getElementById("imageSelect");
+const rowsSel = document.getElementById("rows");
+const colsSel = document.getElementById("cols");
+const shuffleBtn = document.getElementById("shuffleBtn");
+const hintBtn = document.getElementById("hintBtn");
+const resetBtn = document.getElementById("resetBtn");
+const slotsContainer = document.getElementById("slots");
+const piecesContainer = document.getElementById("pieces");
+const message = document.getElementById("message");
+
+let pieces = [];
+let pieceSize = { w: 0, h: 0 };
 let zIndexCounter = 1;
+let dragging = null;
 
-function buildPuzzle(){
-  rows = parseInt(rowsSel.value, 10);
-  cols = parseInt(colsSel.value, 10);
-  // clear
-  slotsContainer.innerHTML = '';
-  piecesContainer.innerHTML = '';
-  pieces = [];
-  message.classList.add('hidden');
+function log(...args) { console.log("[PUZZLE]", ...args); }
 
-  // configure slots grid
-  slotsContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-  slotsContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-
-  // create offscreen image and canvas to slice pieces
-  const img = new Image();
-  img.src = IMAGE_URL;
-  img.onload = () => {
-    // determine board size inside .board (slots container fills board)
-    const board = document.querySelector('.board');
-    boardRect = board.getBoundingClientRect();
-
-    // we want padding/gaps to match CSS; compute slot sizes in CSS pixels
-    const gap = 8; // matches CSS gap
-    const padding = 12; // container padding
-    const availableW = boardRect.width - padding*2 - gap*(cols-1);
-    const availableH = boardRect.height - padding*2 - gap*(rows-1);
-
-    // size piece in CSS pixels (we will scale image accordingly)
-    const slotW = Math.floor(availableW / cols);
-    const slotH = Math.floor(availableH / rows);
-    pieceSize.w = slotW;
-    pieceSize.h = slotH;
-
-    // set CSS size of slots container so it matches board inner area
-    slotsContainer.style.padding = `${padding}px`;
-    slotsContainer.style.gap = `${gap}px`;
-
-    // create a canvas to slice the image at natural image resolution, then scale to slot size
-    const tempCanvas = document.createElement('canvas');
-    // set canvas size to img natural size to get crisp slices
-    tempCanvas.width = img.naturalWidth;
-    tempCanvas.height = img.naturalHeight;
-    const tctx = tempCanvas.getContext('2d');
-    tctx.drawImage(img, 0, 0);
-
-    // compute scale from image pixels to slot pixels
-    const scaleX = img.naturalWidth / (cols * slotW);
-    const scaleY = img.naturalHeight / (rows * slotH);
-
-    // create slots and piece elements
-    for(let r=0;r<rows;r++){
-      for(let c=0;c<cols;c++){
-        // slot element (visual empty target)
-        const slot = document.createElement('div');
-        slot.className = 'slot';
-        slot.dataset.row = r;
-        slot.dataset.col = c;
-        slotsContainer.appendChild(slot);
-
-        // slice image region
-        const sx = Math.round(c * slotW * scaleX);
-        const sy = Math.round(r * slotH * scaleY);
-        const sw = Math.round(slotW * scaleX);
-        const sh = Math.round(slotH * scaleY);
-
-        const pieceCanvas = document.createElement('canvas');
-        pieceCanvas.width = slotW;
-        pieceCanvas.height = slotH;
-        const pctx = pieceCanvas.getContext('2d');
-        // draw scaled slice to piece canvas
-        pctx.drawImage(tempCanvas, sx, sy, sw, sh, 0, 0, slotW, slotH);
-        const dataUrl = pieceCanvas.toDataURL();
-
-        // piece element
-        const piece = document.createElement('div');
-        piece.className = 'piece';
-        piece.style.width = slotW + 'px';
-        piece.style.height = slotH + 'px';
-        piece.style.backgroundImage = `url(${dataUrl})`;
-        piece.style.backgroundSize = `${slotW}px ${slotH}px`;
-        piece.dataset.row = r;
-        piece.dataset.col = c;
-        piece.dataset.placed = 'false';
-        piecesContainer.appendChild(piece);
-
-        pieces.push({
-          el: piece,
-          row: r,
-          col: c,
-          correctLeft: 0, // will compute after layout
-          correctTop: 0,
-          placed: false
-        });
-      }
-    }
-
-    // after elements added to DOM, compute correct positions of slots (CSS pixels)
-    computeCorrectPositions();
-    // shuffle pieces in the free area
-    shufflePieces();
-    // attach drag handlers
-    attachDragHandlers();
-  };
-  img.onerror = () => {
-    instruction.textContent = 'Could not load puzzle image.';
-  };
-}
-
-function computeCorrectPositions(){
-  // get slot positions relative to piecesContainer
-  const slotEls = Array.from(document.querySelectorAll('.slot'));
-  const pcRect = piecesContainer.getBoundingClientRect();
-  slotEls.forEach(slot => {
-    const r = parseInt(slot.dataset.row,10);
-    const c = parseInt(slot.dataset.col,10);
-    const rect = slot.getBoundingClientRect();
-    // translate to piecesContainer coords
-    const left = rect.left - pcRect.left;
-    const top = rect.top - pcRect.top;
-    // find piece object and set correct coords
-    const p = pieces.find(x => x.row === r && x.col === c);
-    if(p){
-      p.correctLeft = left;
-      p.correctTop = top;
-    }
-    // Also set slot size to match piece size (for visual)
-    slot.style.width = pieceSize.w + 'px';
-    slot.style.height = pieceSize.h + 'px';
+if (imageSelect) {
+  IMAGE_URL = imageSelect.value;
+  imageSelect.addEventListener("change", () => {
+    IMAGE_URL = imageSelect.value;
+    buildPuzzle();
   });
 }
 
-function shufflePieces(){
-  // place pieces randomly around the board edges (not overlapping slots)
-  const board = document.querySelector('.board');
+async function buildPuzzle() {
+  const rows = parseInt(rowsSel.value, 10) || 3;
+  const cols = parseInt(colsSel.value, 10) || 3;
+
+  // clear
+  slotsContainer.innerHTML = "";
+  piecesContainer.innerHTML = "";
+  pieces = [];
+  message.classList.add("hidden");
+
+  const board = document.querySelector(".board");
+  if (!board) {
+    console.error("[PUZZLE] no .board element found");
+    return;
+  }
   const br = board.getBoundingClientRect();
-  const padding = 8;
-  pieces.forEach(p=>{
-    p.placed = false;
-    p.el.classList.remove('placed');
-    p.el.dataset.placed = 'false';
-    // random position inside board but avoid center slots area by offsetting to sides
-    const side = Math.random();
-    let x, y;
-    if(side < 0.33){
-      x = Math.random() * (br.width - pieceSize.w);
-      y = br.height - pieceSize.h - padding;
-    } else if(side < 0.66){
-      x = padding;
-      y = Math.random() * (br.height - pieceSize.h);
+
+  // ensure overlay size
+  slotsContainer.style.position = "absolute";
+  slotsContainer.style.left = "0";
+  slotsContainer.style.top = "0";
+  slotsContainer.style.width = br.width + "px";
+  slotsContainer.style.height = br.height + "px";
+
+  piecesContainer.style.position = "absolute";
+  piecesContainer.style.left = "0";
+  piecesContainer.style.top = "0";
+  piecesContainer.style.width = br.width + "px";
+  piecesContainer.style.height = br.height + "px";
+
+  // compute slot size
+  const gap = 8;
+  const padding = 12;
+  const availableW = Math.max(64, br.width - padding * 2 - gap * (cols - 1));
+  const availableH = Math.max(64, br.height - padding * 2 - gap * (rows - 1));
+  const slotW = Math.max(40, Math.floor(availableW / cols));
+  const slotH = Math.max(40, Math.floor(availableH / rows));
+  pieceSize = { w: slotW, h: slotH };
+
+  slotsContainer.style.gridTemplateColumns = `repeat(${cols}, ${slotW}px)`;
+  slotsContainer.style.gridTemplateRows = `repeat(${rows}, ${slotH}px)`;
+  slotsContainer.style.gap = `${gap}px`;
+  slotsContainer.style.padding = `${padding}px`;
+
+  // load and decode image
+  const img = new Image();
+  img.src = IMAGE_URL;
+
+  let imageReady = false;
+  try {
+    if ("decode" in img) {
+      await img.decode();
+      imageReady = !!img.naturalWidth;
+      log("image decoded OK:", IMAGE_URL, "size:", img.naturalWidth, "x", img.naturalHeight);
     } else {
-      x = br.width - pieceSize.w - padding;
-      y = Math.random() * (br.height - pieceSize.h);
+      await new Promise((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error("image load error"));
+      });
+      imageReady = !!img.naturalWidth;
+      log("image loaded via onload:", IMAGE_URL, "size:", img.naturalWidth, "x", img.naturalHeight);
     }
-    // set style in piecesContainer coordinate space
-    const pcRect = piecesContainer.getBoundingClientRect();
-    p.el.style.left = `${x - pcRect.left}px`;
-    p.el.style.top = `${y - pcRect.top}px`;
-    p.el.style.position = 'absolute';
-    p.el.style.transform = 'rotate(' + (Math.random()*20-10) + 'deg)';
+  } catch (err) {
+    console.warn("[PUZZLE] image decode/load failed, will use fallback colors:", err);
+    imageReady = false;
+  }
+
+  // Create slots & pieces — draw directly from `img` into piece canvas if available
+  let index = 0;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      // slot
+      const slot = document.createElement("div");
+      slot.className = "slot";
+      slot.dataset.row = r;
+      slot.dataset.col = c;
+      slot.style.width = `${slotW}px`;
+      slot.style.height = `${slotH}px`;
+      slotsContainer.appendChild(slot);
+
+      // piece
+      const piece = document.createElement("div");
+      piece.className = "piece";
+      piece.style.width = `${slotW}px`;
+      piece.style.height = `${slotH}px`;
+      piece.dataset.row = r;
+      piece.dataset.col = c;
+      piece.dataset.placed = "false";
+      piece.textContent = ""; // do not show numbers
+
+     if (imageReady) {
+        // We need the gap variable from the `buildPuzzle` function scope
+        // It's defined on line 53: const gap = 8;
+        const gap = 8;
+        
+        // Calculate the full image's display size (puzzleW/H) relative to the board slots
+        // This is the size the image will be scaled to across the entire grid (slots + gaps)
+        const puzzleW = cols * slotW + (cols - 1) * gap;
+        const puzzleH = rows * slotH + (rows - 1) * gap;
+        
+        // Calculate the negative offset for this specific piece
+        // The background position must be shifted left/up by the total width/height 
+        // of all the pieces and gaps *before* this piece.
+        const offsetX = -1 * (c * slotW + c * gap); 
+        const offsetY = -1 * (r * slotH + r * gap);
+
+        // Set the full image as the background for the piece
+        piece.style.backgroundImage = `url(${IMAGE_URL})`;
+        
+        // Scale the full image to cover the entire grid
+        piece.style.backgroundSize = `${puzzleW}px ${puzzleH}px`;
+        
+        // Shift the background image to show the correct slice
+        piece.style.backgroundPosition = `${offsetX}px ${offsetY}px`;
+      }
+
+      // fallback if slicing failed or image not ready
+      if (!piece.style.backgroundImage) {
+        const alt = ["#ffe9b4", "#cdeed6", "#f6c6d0", "#bee7f6"];
+        piece.style.background = alt[(r + c) % alt.length];
+      }
+
+      piecesContainer.appendChild(piece);
+
+      pieces.push({
+        el: piece,
+        row: r,
+        col: c,
+        correctLeft: 0,
+        correctTop: 0,
+        placed: false
+      });
+
+      index++;
+    }
+  }
+
+  // compute positions then shuffle and attach handlers
+  requestAnimationFrame(() => {
+    computeCorrectPositions();
+    shufflePieces();
+    attachDragHandlers();
+    log("buildPuzzle done. pieces:", pieces.length, "pieceSize:", pieceSize);
+  });
+}
+
+function computeCorrectPositions() {
+  const pcRect = piecesContainer.getBoundingClientRect();
+  document.querySelectorAll(".slot").forEach(slot => {
+    const rect = slot.getBoundingClientRect();
+    const r = parseInt(slot.dataset.row, 10);
+    const c = parseInt(slot.dataset.col, 10);
+    const p = pieces.find(x => x.row === r && x.col === c);
+    if (p) {
+      p.correctLeft = Math.round(rect.left - pcRect.left);
+      p.correctTop = Math.round(rect.top - pcRect.top);
+    }
+  });
+}
+
+function shufflePieces() {
+  const board = document.querySelector(".board");
+  const bw = board.clientWidth;
+  const bh = board.clientHeight;
+  const padding = 8;
+
+  pieces.forEach((p, idx) => {
+    p.placed = false;
+    p.el.classList.remove("placed");
+    p.el.dataset.placed = "false";
+    p.el.style.pointerEvents = "auto";
+
+    const zone = idx % 4;
+    let x, y;
+    if (zone === 0) {
+      x = Math.random() * (bw - pieceSize.w - padding*2) + padding;
+      y = padding;
+    } else if (zone === 1) {
+      x = Math.random() * (bw - pieceSize.w - padding*2) + padding;
+      y = bh - pieceSize.h - padding;
+    } else if (zone === 2) {
+      x = padding;
+      y = Math.random() * (bh - pieceSize.h - padding*2) + padding;
+    } else {
+      x = bw - pieceSize.w - padding;
+      y = Math.random() * (bh - pieceSize.h - padding*2) + padding;
+    }
+
+    p.el.style.position = "absolute";
+    p.el.style.left = `${Math.round(x)}px`;
+    p.el.style.top = `${Math.round(y)}px`;
+    p.el.style.transform = `rotate(${(Math.random()*18-9)}deg)`;
     p.el.style.zIndex = ++zIndexCounter;
   });
 }
 
-function attachDragHandlers(){
-  pieces.forEach(p=>{
+function attachDragHandlers() {
+  pieces.forEach(p => {
     const el = p.el;
+    el.onpointerdown = null;
+    el.onpointermove = null;
+    el.onpointerup = null;
 
-    // pointer events work for mouse + touch
-    el.addEventListener('pointerdown', startDrag);
-
-    function startDrag(e){
+    el.style.touchAction = "none";
+    el.onpointerdown = (e) => {
       if (p.placed) return;
-      el.setPointerCapture(e.pointerId);
+      try { el.setPointerCapture(e.pointerId); } catch(_) {}
       dragging = {
         piece: p,
         el,
+        id: e.pointerId,
         startX: e.clientX,
         startY: e.clientY,
         origLeft: parseFloat(el.style.left) || 0,
-        origTop: parseFloat(el.style.top) || 0,
-        id: e.pointerId
+        origTop: parseFloat(el.style.top) || 0
       };
-      el.style.transition = 'none';
-      el.style.transform = 'none';
+      el.style.transition = "none";
       el.style.zIndex = ++zIndexCounter;
-      document.addEventListener('pointermove', onMove);
-      document.addEventListener('pointerup', endDrag);
-    }
+    };
 
-    function onMove(ev){
-      if (!dragging || dragging.id !== ev.pointerId) return;
-      const dx = ev.clientX - dragging.startX;
-      const dy = ev.clientY - dragging.startY;
-      const nx = dragging.origLeft + dx;
-      const ny = dragging.origTop + dy;
-      el.style.left = nx + 'px';
-      el.style.top = ny + 'px';
-    }
+    el.onpointermove = (e) => {
+      if (!dragging || dragging.id !== e.pointerId) return;
+      const dx = e.clientX - dragging.startX;
+      const dy = e.clientY - dragging.startY;
+      dragging.el.style.left = (dragging.origLeft + dx) + "px";
+      dragging.el.style.top = (dragging.origTop + dy) + "px";
+    };
 
-    function endDrag(ev){
-      if (!dragging || dragging.id !== ev.pointerId) return;
-      document.removeEventListener('pointermove', onMove);
-      document.removeEventListener('pointerup', endDrag);
-      el.releasePointerCapture(ev.pointerId);
-      // check snap to correct slot
-      const dx = ev.clientX - dragging.startX;
-      const dy = ev.clientY - dragging.startY;
-      const finalLeft = dragging.origLeft + dx;
-      const finalTop = dragging.origTop + dy;
-
-      // distance to correct spot
-      const distX = finalLeft - p.correctLeft;
-      const distY = finalTop - p.correctTop;
-      const dist = Math.hypot(distX, distY);
-
-      // snap threshold (pixels)
+    el.onpointerup = (e) => {
+      if (!dragging || dragging.id !== e.pointerId) return;
+      try { el.releasePointerCapture(e.pointerId); } catch(_) {}
+      const finalLeft = parseFloat(el.style.left) || 0;
+      const finalTop = parseFloat(el.style.top) || 0;
+      const dx = finalLeft - p.correctLeft;
+      const dy = finalTop - p.correctTop;
+      const dist = Math.hypot(dx, dy);
       const threshold = Math.max(pieceSize.w, pieceSize.h) * 0.35;
-
-      if(dist <= threshold){
-        // snap into place
-        el.style.left = p.correctLeft + 'px';
-        el.style.top = p.correctTop + 'px';
-        el.classList.add('placed');
+      if (dist <= threshold) {
+        el.style.left = p.correctLeft + "px";
+        el.style.top = p.correctTop + "px";
+        el.classList.add("placed");
         p.placed = true;
-        el.dataset.placed = 'true';
-        el.style.pointerEvents = 'none';
-        el.style.transform = 'none';
+        el.dataset.placed = "true";
+        el.style.pointerEvents = "none";
         checkCompletion();
-      } else {
-        // leave where dropped
       }
-
       dragging = null;
-    }
+    };
   });
 }
 
-function checkCompletion(){
-  const allPlaced = pieces.every(p => p.placed);
-  if(allPlaced){
-    message.classList.remove('hidden');
+function checkCompletion() {
+  if (pieces.length && pieces.every(p => p.placed)) {
+    message.classList.remove("hidden");
+    log("puzzle complete");
   }
 }
 
-shuffleBtn.addEventListener('click', () => {
-  shufflePieces();
-  message.classList.add('hidden');
-});
+shuffleBtn.addEventListener("click", () => { shufflePieces(); message.classList.add("hidden"); });
+resetBtn.addEventListener("click", () => { buildPuzzle(); });
+hintBtn.addEventListener("click", () => {
+  // Recalculate parameters needed for the hint display
+  const rows = parseInt(rowsSel.value, 10) || 3;
+  const cols = parseInt(colsSel.value, 10) || 3;
+  
+  // The 'gap' variable is defined as 8 in the buildPuzzle function (line 53)
+  const gap = 8;
+  
+  // We need the latest piece size, which is calculated and stored globally
+  // (Assuming pieceSize is updated by buildPuzzle, which it is)
+  const { w: slotW, h: slotH } = pieceSize;
+  
+  // Calculate the total width and height of the grid (slots + gaps)
+  const puzzleW = cols * slotW + (cols - 1) * gap;
+  const puzzleH = rows * slotH + (rows - 1) * gap;
 
-resetBtn.addEventListener('click', () => {
-  // rebuild full puzzle (useful if rows/cols changed)
-  buildPuzzle();
-});
-
-hintBtn.addEventListener('click', () => {
-  // briefly show a faint preview of full image in the slot area
-  // overlay a temporary element
-  const preview = document.createElement('div');
-  preview.style.position = 'absolute';
-  preview.style.inset = '12px';
+  // Get the board element
+  const board = document.querySelector(".board");
+  
+  // Create the preview overlay
+  const preview = document.createElement("div");
+  preview.style.position = "absolute";
+  
+  // Position the hint exactly where the slots start (accounting for the 12px padding)
+  const padding = 12;
+  preview.style.left = `${padding}px`;
+  preview.style.top = `${padding}px`;
+  
+  // Set the size to match the total grid size (puzzleW/H calculated above)
+  preview.style.width = `${puzzleW}px`;
+  preview.style.height = `${puzzleH}px`;
+  
+  // Use the current image URL
   preview.style.backgroundImage = `url(${IMAGE_URL})`;
-  preview.style.backgroundSize = `${cols * pieceSize.w}px ${rows * pieceSize.h}px`;
+  
+  // Set background size to fit the content exactly (it should match the size you use for the pieces)
+  preview.style.backgroundSize = `${puzzleW}px ${puzzleH}px`;
+  
   preview.style.opacity = '0.45';
-  preview.style.borderRadius = '10px';
-  preview.style.pointerEvents = 'none';
-  preview.style.zIndex = 0;
-  document.querySelector('.board').appendChild(preview);
+  preview.style.zIndex = 0; // Behind the pieces
+  preview.style.borderRadius = '8px';
+  
+  board.appendChild(preview);
+  
+  // Remove the hint after 0.9 seconds
   setTimeout(()=> preview.remove(), 900);
 });
 
-// rebuild on rows/cols change
-rowsSel.addEventListener('change', buildPuzzle);
-colsSel.addEventListener('change', buildPuzzle);
+rowsSel.addEventListener("change", () => buildPuzzle());
+colsSel.addEventListener("change", () => buildPuzzle());
 
-// initial build
-window.addEventListener('load', () => {
+window.addEventListener("load", () => {
+  const sel = document.getElementById('imageSelect');
+  if (sel) IMAGE_URL = sel.value;
   buildPuzzle();
-  // ensure layout recalculation if window resizes (recompute correct positions)
-  window.addEventListener('resize', () => {
-    computeCorrectPositions();
-  });
+  setTimeout(()=> {
+    log("board size:", document.querySelector('.board').getBoundingClientRect());
+    log("pieces count:", document.querySelectorAll('.piece').length);
+  }, 600);
 });
+
+// expose debug helpers
+window._puzzleDebug = { pieces, pieceSize, buildPuzzle, shufflePieces, computeCorrectPositions };
