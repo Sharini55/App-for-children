@@ -11,10 +11,8 @@
     <div class="top pic picture"></div>
     <div class="bottom pic picture"></div>
 
-    
     <div class="hearts heart">
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      </svg>
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"></svg>
       <span>100</span>
     </div>
 
@@ -26,27 +24,16 @@
         </h1>
 
         <div class="tile">
-          <div class="tile-inner">
-            ★
-          </div>
+          <div class="tile-inner">★</div>
         </div>
 
-    
         <div class="controls-row">
-         
-          <button class="icon-btn icon-button" aria-label="Home">
-            🏠
-          </button>
-
+          <button class="icon-btn icon-button" aria-label="Home">🏠</button>
           <button class="play-btn play-button" aria-label="Play">
             <span class="play-icon">▶</span>
             <span class="play-text">PLAY</span>
           </button>
-
-    
-          <button class="icon-btn icon-button" aria-label="Settings">
-            ⚙
-          </button>
+          <button class="icon-btn icon-button" aria-label="Settings">⚙</button>
         </div>
       </section>
     </main>
@@ -55,6 +42,20 @@
       <p>&copy; 2023 Motor Skills Adventure. All rights reserved.</p>
     </footer>
   </div>
-</body>
 
+  <script>
+    document.querySelector(".play-btn").addEventListener("click", () => {
+      window.location.href = "index.html";
+    });
+
+    document.querySelector(".icon-btn[aria-label='Home']").addEventListener("click", () => {
+      window.location.href = "home.html";
+    });
+
+    document.querySelector(".icon-btn[aria-label='Settings']").addEventListener("click", () => {
+      window.location.href = "profile.html";
+    });
+  </script>
+
+</body>
 </html>
