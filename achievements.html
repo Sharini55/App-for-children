@@ -1,0 +1,24 @@
+  <!-- Next button on the right like the screenshot -->
+  <button class="next" id="nextBtn" title="Next">➡️</button>
+
+  <script>
+  /* -----------------------
+      Existing Page Logic
+     ----------------------- */
+
+  // (KEEP your existing JS here — such as photo upload, stars logic, next button, etc.)
+  // Do NOT remove anything you already have, simply keep it above this line.
+
+
+  /* -----------------------
+      Back Button Behavior
+     ----------------------- */
+
+  const backBtn = document.querySelector('.back-btn');
+
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      window.location.href = "profile.html";  // ← go back to Profile Page
+    });
+  }
+</script>

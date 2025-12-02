@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coloring Time</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --peach-bg:#F9E3C9;
+      --panel:#FFEFE2;
+      --brown:#7B4B2A;
+      --pink:#F8BFC1;
+      --btn-yellow:#FCE7A1;
+      --tile-blue:#B6D8F2;
+      --tile-yellow:#FFE7A8;
+      --tile-green:#B9E4C9;
+      --tile-pink:#F4B3BE;
+      --tile-lilac:#DDE5FF;
+    }
+
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      background:var(--peach-bg);
+      color:var(--brown);
+      font-family:"Nunito", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      position:relative;
+      width:100%;
+      padding:18px 22px;
+    }
+
+    .nav-left {
+      display:flex;
+      gap:14px;
+      align-items:center;
+    }
+
+    .nav-btn {
+      background:var(--btn-yellow);
+      border:3px solid var(--brown);
+      border-radius:14px;
+      padding:10px 12px;
+      font-size:20px;
+      box-shadow:4px 4px 0 var(--brown);
+      cursor:pointer;
+    }
+
+    .nav-btn:active { transform:translateY(1px); }
+
+    .back-btn {
+      position:absolute;
+      left:22px;
+      top:92px;
+      background:#FFE29A;
+    }
+
+    .hearts {
+      position:absolute;
+      right:22px;
+      top:18px;
+      background:var(--pink);
+      border:3px solid var(--brown);
+      border-radius:16px;
+      padding:6px 14px;
+      font-weight:800;
+      box-shadow:4px 4px 0 var(--brown);
+    }
+
+    /* PAGE TITLE */
+    .page-title {
+      margin-top:40px;
+      font-size:42px;
+      text-align:center;
+      text-shadow:0 5px 0 rgba(123,75,42,0.15);
+    }
+
+    /* MAIN LAYOUT */
+    .coloring-layout {
+      width:min(1200px, 96vw);
+      display:grid;
+      grid-template-columns:280px 1fr;
+      gap:40px;
+      margin:40px auto 60px;
+    }
+
+    /* LEFT – COLOR PALETTE */
+    .palette-card {
+      background:var(--panel);
+      border:4px solid var(--brown);
+      border-radius:26px;
+      box-shadow:6px 6px 0 var(--brown);
+      padding:26px 26px 30px;
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+    }
+
+    .palette-title {
+      font-size:26px;
+      margin:0;
+    }
+
+    .palette-grid {
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:18px;
+    }
+
+    .color-swatch {
+      height:70px;
+      border-radius:22px;
+      border:4px solid var(--brown);
+      box-shadow:6px 6px 0 var(--brown);
+      cursor:pointer;
+      transition:transform 0.08s ease-out;
+    }
+
+    .color-swatch.active {
+      transform:translateY(-2px) scale(1.03);
+      outline:4px solid rgba(123,75,42,0.4);
+    }
+
+    .swatch-pink   { background:var(--tile-pink); }
+    .swatch-blue   { background:var(--tile-blue); }
+    .swatch-green  { background:var(--tile-green); }
+    .swatch-yellow { background:var(--tile-yellow); }
+    .swatch-lilac  { background:var(--tile-lilac); }
+    .swatch-mint   { background:#C6ECCC; }
+
+    /* Brush size control */
+    .brush-controls {
+      margin-top:8px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      font-size:14px;
+    }
+
+    .brush-controls label {
+      font-weight:700;
+    }
+
+    .brush-controls input[type="range"] {
+      width:100%;
+      accent-color:var(--brown);
+    }
+
+    /* RIGHT – CANVAS PANEL */
+    .canvas-card {
+      background:var(--panel);
+      border:4px solid var(--brown);
+      border-radius:26px;
+      box-shadow:6px 6px 0 var(--brown);
+      padding:26px 32px 36px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      gap:20px;
+    }
+
+    .canvas-frame {
+      background:#ffffff;
+      border-radius:24px;
+      border:4px solid var(--brown);
+      box-shadow:6px 6px 0 var(--brown);
+      padding:14px;
+    }
+
+    canvas {
+      display:block;
+      background:#ffffff;
+      border-radius:18px;
+      transition:transform 0.05s linear;
+      cursor:none; /* we use custom cursor */
+    }
+
+    .helper-text {
+      font-size:18px;
+      margin-top:6px;
+    }
+
+    .score-text {
+      font-size:16px;
+      margin-top:4px;
+      opacity:0.85;
+    }
+
+    /* Custom brush cursor */
+    #brushCursor {
+      position:fixed;
+      pointer-events:none;
+      border-radius:50%;
+      border:2px solid rgba(0,150,0,0.9);
+      background:rgba(0,200,0,0.25);
+      transform:translate(-50%, -50%);
+      z-index:9999;
+      display:none;
+    }
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <header class="navbar">
+    <div class="nav-left">
+      <button class="nav-btn" title="Home">🏠</button>
+      <button class="nav-btn" title="Settings">⚙️</button>
+    </div>
+    <div class="hearts">❤️ 100</div>
+    <button class="nav-btn back-btn" title="Back">↩️</button>
+  </header>
+
+  <!-- TITLE -->
+  <h1 class="page-title" id="pageTitle">Coloring Time!</h1>
+
+  <!-- MAIN CONTENT -->
+  <section class="coloring-layout">
+    <!-- LEFT: palette -->
+    <article class="palette-card">
+      <h2 class="palette-title">Pick a Color!</h2>
+      <div class="palette-grid" id="palette">
+        <div class="color-swatch swatch-pink"   data-color="#F8BFC1"></div>
+        <div class="color-swatch swatch-blue"   data-color="#B6D8F2"></div>
+        <div class="color-swatch swatch-green"  data-color="#B9E4C9"></div>
+        <div class="color-swatch swatch-yellow" data-color="#FFE7A8"></div>
+        <div class="color-swatch swatch-lilac"  data-color="#DDE5FF"></div>
+        <div class="color-swatch swatch-mint"   data-color="#C6ECCC"></div>
+      </div>
+
+      <!-- NEW: brush size control -->
+      <div class="brush-controls">
+        <label for="brushSize">Brush size</label>
+        <input id="brushSize" type="range" min="6" max="32" value="10" />
+      </div>
+    </article>
+
+    <!-- RIGHT: canvas -->
+    <article class="canvas-card">
+      <div class="canvas-frame">
+        <canvas id="colorCanvas" width="600" height="380"></canvas>
+      </div>
+      <p class="helper-text" id="helperText">Tap to color the square! 🎨</p>
+      <p class="score-text" id="scoreText">Score: 0</p>
+    </article>
+  </section>
+
+  <!-- custom cursor element -->
+  <div id="brushCursor"></div>
+
+  <script>
+    /* -----------------------
+        Globals & State
+       ----------------------- */
+
+    const canvas = document.getElementById('colorCanvas');
+    const ctx = canvas.getContext('2d');
+    const palette = document.getElementById('palette');
+    const helperText = document.getElementById('helperText');
+    const scoreText = document.getElementById('scoreText');
+    const brushCursor = document.getElementById('brushCursor');
+    const brushSlider = document.getElementById('brushSize');
+
+    const BROWN = '#7B4B2A';
+    let currentColor = '#F8BFC1';
+    let penSize = 10; // NEW: brush size used for drawing & cursor
+
+    const levels = [
+      'square',
+      'triangle',
+      'circle',
+      'diamond',
+      'butterfly',
+      'fish',
+      'turtle'
+    ];
+    let currentLevelIndex = 0;
+
+    // Each level is made of parts; part = Path2D
+    let parts = [];
+    let partCompleted = [];
+    let lastX = 0;
+    let lastY = 0;
+    let isDrawing = false;
+    let startedPartIndex = null;
+    let invalidStroke = false;
+    let drewInside = false;
+
+    // Vibrations / glows
+    let isErrorVibrating = false;
+    let vibrationInterval = null;
+
+    let score = 0;
+
+    /* -----------------------
+        Level / Shape Building
+       ----------------------- */
+
+    function buildSquareParts() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const size = 160;
+      const p = new Path2D();
+      p.rect(cx - size/2, cy - size/2, size, size);
+      return [p];
+    }
+
+    function buildTriangleParts() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const size = 180;
+      const p = new Path2D();
+      p.moveTo(cx, cy - size/2);
+      p.lineTo(cx - size/2, cy + size/2);
+      p.lineTo(cx + size/2, cy + size/2);
+      p.closePath();
+      return [p];
+    }
+
+    function buildCircleParts() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const r = 90;
+      const p = new Path2D();
+      p.arc(cx, cy, r, 0, Math.PI * 2);
+      return [p];
+    }
+
+    function buildDiamondParts() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const s = 120;
+      const p = new Path2D();
+      p.moveTo(cx, cy - s);
+      p.lineTo(cx - s, cy);
+      p.lineTo(cx, cy + s);
+      p.lineTo(cx + s, cy);
+      p.closePath();
+      return [p];
+    }
+
+    function buildButterflyParts() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const s = 0.55;
+
+      const partsArr = [];
+
+      // Left top wing
+      let p1 = new Path2D();
+      p1.moveTo(cx, cy - 20 * s);
+      p1.bezierCurveTo(cx - 140 * s, cy - 180 * s, cx - 220 * s, cy - 40 * s, cx - 80 * s, cy - 10 * s);
+      p1.bezierCurveTo(cx - 160 * s, cy + 40 * s, cx - 50 * s, cy + 40 * s, cx - 10 * s, cy);
+      p1.closePath();
+      partsArr.push(p1);
+
+      // Right top wing
+      let p2 = new Path2D();
+      p2.moveTo(cx, cy - 20 * s);
+      p2.bezierCurveTo(cx + 140 * s, cy - 180 * s, cx + 220 * s, cy - 40 * s, cx + 80 * s, cy - 10 * s);
+      p2.bezierCurveTo(cx + 160 * s, cy + 40 * s, cx + 50 * s, cy + 40 * s, cx + 10 * s, cy);
+      p2.closePath();
+      partsArr.push(p2);
+
+      // Left bottom wing
+      let p3 = new Path2D();
+      p3.moveTo(cx, cy + 20 * s);
+      p3.bezierCurveTo(cx - 120 * s, cy + 20 * s, cx - 150 * s, cy + 160 * s, cx - 40 * s, cy + 150 * s);
+      p3.bezierCurveTo(cx - 100 * s, cy + 200 * s, cx - 10 * s, cy + 180 * s, cx - 5 * s, cy + 80 * s);
+      p3.closePath();
+      partsArr.push(p3);
+
+      // Right bottom wing
+      let p4 = new Path2D();
+      p4.moveTo(cx, cy + 20 * s);
+      p4.bezierCurveTo(cx + 120 * s, cy + 20 * s, cx + 150 * s, cy + 160 * s, cx + 40 * s, cy + 150 * s);
+      p4.bezierCurveTo(cx + 100 * s, cy + 200 * s, cx + 10 * s, cy + 180 * s, cx + 5 * s, cy + 80 * s);
+      p4.closePath();
+      partsArr.push(p4);
+
+      // Body
+      let p5 = new Path2D();
+      p5.moveTo(cx - 10 * s, cy - 40 * s);
+      p5.lineTo(cx + 10 * s, cy - 40 * s);
+      p5.lineTo(cx + 10 * s, cy + 85 * s);
+      p5.lineTo(cx - 10 * s, cy + 85 * s);
+      p5.closePath();
+      partsArr.push(p5);
+
+      return partsArr;
+    }
+
+    function buildFishParts() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const s = 0.55;
+      const partsArr = [];
+
+      // Body
+      let body = new Path2D();
+      body.moveTo(cx - 140 * s, cy);
+      body.bezierCurveTo(cx - 60 * s, cy - 100 * s, cx + 120 * s, cy - 100 * s, cx + 120 * s, cy);
+      body.bezierCurveTo(cx + 120 * s, cy + 100 * s, cx - 60 * s, cy + 100 * s, cx - 140 * s, cy);
+      body.closePath();
+      partsArr.push(body);
+
+      // Tail
+      let tail = new Path2D();
+      tail.moveTo(cx - 140 * s, cy);
+      tail.lineTo(cx - 190 * s, cy - 60 * s);
+      tail.lineTo(cx - 190 * s, cy + 60 * s);
+      tail.closePath();
+      partsArr.push(tail);
+
+      return partsArr;
+    }
+
+    function buildTurtleParts() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const s = 0.55;
+      const partsArr = [];
+
+      // Shell
+      let shell = new Path2D();
+      shell.moveTo(cx - 120 * s, cy);
+      shell.bezierCurveTo(cx - 90 * s, cy - 130 * s, cx + 90 * s, cy - 130 * s, cx + 120 * s, cy);
+      shell.bezierCurveTo(cx + 90 * s, cy + 130 * s, cx - 90 * s, cy + 130 * s, cx - 120 * s, cy);
+      shell.closePath();
+      partsArr.push(shell);
+
+      // Head
+      let head = new Path2D();
+      head.moveTo(cx + 120 * s, cy - 20 * s);
+      head.quadraticCurveTo(cx + 170 * s, cy - 10 * s, cx + 160 * s, cy + 20 * s);
+      head.quadraticCurveTo(cx + 150 * s, cy + 40 * s, cx + 120 * s, cy + 20 * s);
+      head.closePath();
+      partsArr.push(head);
+
+      // Legs combined
+      let legs = new Path2D();
+      legs.moveTo(cx - 70 * s, cy - 110 * s);
+      legs.lineTo(cx - 90 * s, cy - 140 * s);
+      legs.lineTo(cx - 50 * s, cy - 130 * s);
+      legs.closePath();
+      legs.moveTo(cx + 70 * s, cy - 110 * s);
+      legs.lineTo(cx + 90 * s, cy - 140 * s);
+      legs.lineTo(cx + 50 * s, cy - 130 * s);
+      legs.closePath();
+      legs.moveTo(cx - 70 * s, cy + 110 * s);
+      legs.lineTo(cx - 90 * s, cy + 140 * s);
+      legs.lineTo(cx - 50 * s, cy + 130 * s);
+      legs.closePath();
+      legs.moveTo(cx + 70 * s, cy + 110 * s);
+      legs.lineTo(cx + 90 * s, cy + 140 * s);
+      legs.lineTo(cx + 50 * s, cy + 130 * s);
+      legs.closePath();
+      partsArr.push(legs);
+
+      return partsArr;
+    }
+
+    function buildLevelParts(name) {
+      if (name === 'square')    return buildSquareParts();
+      if (name === 'triangle')  return buildTriangleParts();
+      if (name === 'circle')    return buildCircleParts();
+      if (name === 'diamond')   return buildDiamondParts();
+      if (name === 'butterfly') return buildButterflyParts();
+      if (name === 'fish')      return buildFishParts();
+      if (name === 'turtle')    return buildTurtleParts();
+      return buildSquareParts();
+    }
+
+    function updateHelperText() {
+      const levelName = levels[currentLevelIndex];
+      helperText.textContent = `Tap to color the ${levelName}! 🎨`;
+    }
+
+    function drawFullShape() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = BROWN;
+      ctx.fillStyle = '#FFFFFF';
+      parts.forEach(p => {
+        ctx.fill(p);
+        ctx.stroke(p);
+      });
+    }
+
+    function loadCurrentLevel() {
+      parts = buildLevelParts(levels[currentLevelIndex]);
+      partCompleted = new Array(parts.length).fill(false);
+      invalidStroke = false;
+      drewInside = false;
+      startedPartIndex = null;
+      drawFullShape();
+      updateHelperText();
+    }
+
+    function flashPartCompleted(partIndex) {
+      const p = parts[partIndex];
+      ctx.save();
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = '#2ECC71';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.shadowColor = 'rgba(46,204,113,0.9)';
+      ctx.shadowBlur = 25;
+
+      ctx.fill(p);
+      ctx.stroke(p);
+
+      ctx.restore();
+
+      setTimeout(() => {
+        drawFullShape();
+        ctx.save();
+        ctx.fillStyle = '#E6FFE6';
+        ctx.strokeStyle = BROWN;
+        partCompleted.forEach((done, idx) => {
+          if (done) {
+            ctx.fill(parts[idx]);
+            ctx.stroke(parts[idx]);
+          }
+        });
+        ctx.restore();
+      }, 700);
+    }
+
+    /* -----------------------
+        Vibrations (error + success)
+       ----------------------- */
+
+    function startErrorVibration() {
+      if (isErrorVibrating) return;
+      isErrorVibrating = true;
+      let dir = 1;
+
+      clearInterval(vibrationInterval);
+      vibrationInterval = setInterval(() => {
+        canvas.style.transform = `translateX(${dir * 2}px)`;
+        dir *= -1;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = '#ff3b3b';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.shadowColor = 'rgba(255,0,0,0.9)';
+        ctx.shadowBlur = 25;
+
+        parts.forEach(p => {
+          ctx.fill(p);
+          ctx.stroke(p);
+        });
+
+        ctx.shadowBlur = 0;
+      }, 50);
+    }
+
+    function stopErrorVibration() {
+      if (!isErrorVibrating) return;
+      isErrorVibrating = false;
+      clearInterval(vibrationInterval);
+      canvas.style.transform = 'translateX(0px)';
+      drawFullShape();
+      ctx.save();
+      ctx.fillStyle = '#E6FFE6';
+      ctx.strokeStyle = BROWN;
+      partCompleted.forEach((done, idx) => {
+        if (done) {
+          ctx.fill(parts[idx]);
+          ctx.stroke(parts[idx]);
+        }
+      });
+      ctx.restore();
+    }
+
+    function successVibrationAndNextLevel() {
+      let duration = 1200;
+      let elapsed = 0;
+      let dir = 1;
+
+      clearInterval(vibrationInterval);
+      vibrationInterval = setInterval(() => {
+        elapsed += 80;
+        canvas.style.transform = `translateX(${dir * 2}px)`;
+        dir *= -1;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = '#2ECC71';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.shadowColor = 'rgba(46,204,113,0.9)';
+        ctx.shadowBlur = 25;
+
+        parts.forEach(p => {
+          ctx.fill(p);
+          ctx.stroke(p);
+        });
+
+        ctx.shadowBlur = 0;
+
+        if (elapsed >= duration) {
+          clearInterval(vibrationInterval);
+          canvas.style.transform = 'translateX(0px)';
+          currentLevelIndex = (currentLevelIndex + 1) % levels.length;
+          loadCurrentLevel();
+        }
+      }, 80);
+    }
+
+    /* -----------------------
+        Palette
+       ----------------------- */
+    const swatches = palette.querySelectorAll('.color-swatch');
+    swatches.forEach((swatch, i) => {
+      if (i === 0) swatch.classList.add('active');
+      swatch.addEventListener('click', () => {
+        currentColor = swatch.dataset.color;
+        swatches.forEach(s => s.classList.remove('active'));
+        swatch.classList.add('active');
+      });
+    });
+
+    // NEW: brush size control
+    if (brushSlider) {
+      brushSlider.addEventListener('input', () => {
+        penSize = parseInt(brushSlider.value, 10) || 10;
+      });
+    }
+
+    /* -----------------------
+        Helpers
+       ----------------------- */
+
+    function getCoverageForPart(partPath) {
+      const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = img.data;
+      let shapePixels = 0;
+      let coloredPixels = 0;
+
+      for (let y = 0; y < canvas.height; y += 2) {
+        for (let x = 0; x < canvas.width; x += 2) {
+          if (ctx.isPointInPath(partPath, x, y)) {
+            shapePixels++;
+            const idx = (y * canvas.width + x) * 4;
+            const r = data[idx];
+            const g = data[idx + 1];
+            const b = data[idx + 2];
+            if (!(r > 245 && g > 245 && b > 245)) {
+              coloredPixels++;
+            }
+          }
+        }
+      }
+      if (shapePixels === 0) return 0;
+      return coloredPixels / shapePixels;
+    }
+
+    function allPartsCompleted() {
+      return partCompleted.every(Boolean);
+    }
+
+    function getCanvasPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+    }
+
+    function findPartIndexAtPoint(x, y) {
+      for (let i = 0; i < parts.length; i++) {
+        if (ctx.isPointInPath(parts[i], x, y)) return i;
+      }
+      return null;
+    }
+
+    /* -----------------------
+        Canvas interaction
+       ----------------------- */
+
+    canvas.addEventListener('mousedown', (e) => {
+      const { x, y } = getCanvasPos(e);
+      isDrawing = true;
+      invalidStroke = false;
+      drewInside = false;
+      startedPartIndex = findPartIndexAtPoint(x, y);
+      lastX = x;
+      lastY = y;
+      stopErrorVibration();
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      const { x, y } = getCanvasPos(e);
+
+      // Update custom cursor position & appearance
+      if (brushCursor) {
+        brushCursor.style.display = 'block';
+        brushCursor.style.left = `${e.clientX}px`;
+        brushCursor.style.top = `${e.clientY}px`;
+        brushCursor.style.width = `${penSize}px`;
+        brushCursor.style.height = `${penSize}px`;
+
+        let cursorBg, cursorBorder;
+
+        if (isDrawing && startedPartIndex !== null) {
+          const startedPart = parts[startedPartIndex];
+          const insideStarted = ctx.isPointInPath(startedPart, x, y);
+
+          if (!insideStarted) {
+            // actively drawing outside required region -> red
+            cursorBg = 'rgba(255,0,0,0.25)';
+            cursorBorder = 'rgba(255,0,0,0.9)';
+          } else {
+            // drawing correctly inside part
+            cursorBg = 'rgba(0,0,0,0)';
+            cursorBorder = 'rgba(123,75,42,0.9)';
+          }
+        } else {
+          // not drawing: show green when not in colorable region
+          const partAtPoint = findPartIndexAtPoint(x, y);
+          if (partAtPoint === null) {
+            cursorBg = 'rgba(0,200,0,0.25)';
+            cursorBorder = 'rgba(0,150,0,0.9)';
+          } else {
+            cursorBg = 'rgba(0,0,0,0)';
+            cursorBorder = 'rgba(123,75,42,0.9)';
+          }
+        }
+
+        brushCursor.style.background = cursorBg;
+        brushCursor.style.borderColor = cursorBorder;
+      }
+
+      if (!isDrawing) return;
+
+      // drawing logic as before
+      if (startedPartIndex === null) return;
+
+      const p = parts[startedPartIndex];
+      const inside = ctx.isPointInPath(p, x, y);
+
+      if (!inside && !invalidStroke) {
+        invalidStroke = true;
+        startErrorVibration();
+        partCompleted = new Array(parts.length).fill(false);
+        drawFullShape();
+        return;
+      }
+
+      if (invalidStroke) {
+        startErrorVibration();
+        return;
+      }
+
+      ctx.strokeStyle = currentColor;
+      ctx.lineWidth = penSize; // NEW: use brush size
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+
+      lastX = x;
+      lastY = y;
+      drewInside = true;
+    });
+
+    function handleStrokeEnd() {
+      if (!isDrawing) return;
+      isDrawing = false;
+
+      if (startedPartIndex === null || invalidStroke || !drewInside) {
+        stopErrorVibration();
+        return;
+      }
+
+      const partPath = parts[startedPartIndex];
+      const coverage = getCoverageForPart(partPath);
+      const threshold = 0.65;
+
+      if (coverage >= threshold && !partCompleted[startedPartIndex]) {
+        partCompleted[startedPartIndex] = true;
+        flashPartCompleted(startedPartIndex);
+      }
+
+      if (allPartsCompleted()) {
+        score++;
+        scoreText.textContent = `Score: ${score}`;
+        successVibrationAndNextLevel();
+      }
+
+      stopErrorVibration();
+    }
+
+    canvas.addEventListener('mouseup', handleStrokeEnd);
+    canvas.addEventListener('mouseleave', (e) => {
+      handleStrokeEnd();
+      if (brushCursor) brushCursor.style.display = 'none';
+    });
+
+    canvas.addEventListener('mouseenter', () => {
+      if (brushCursor) brushCursor.style.display = 'block';
+    });
+
+    /* -----------------------
+        Back button
+       ----------------------- */
+    const backBtn = document.querySelector('.back-btn');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        window.location.href = 'profile.html';
+      });
+    }
+
+    /* -----------------------
+        Init
+       ----------------------- */
+    loadCurrentLevel();
+  </script>
+</body>
+</html>

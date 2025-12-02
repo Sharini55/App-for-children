@@ -1,0 +1,395 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Edit Profile – Create Your Character</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --peach-bg:#F9E3C9;
+  --panel:#FFEFE2;
+  --brown:#7B4B2A;
+  --shadow:rgba(0,0,0,0);
+  --pink:#F8BFC1; /* hearts */
+  --btn-yellow:#FCE7A1;
+  --tile-blue:#B6D8F2;
+  --tile-yellow:#FFE7A8;
+  --tile-green:#B9E4C9;
+  --tile-pink:#F4B3BE;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--peach-bg); color:var(--brown);
+  font-family:"Nunito", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  display:flex; flex-direction:column; align-items:center;
+}
+/* NAV */
+.navbar{position:relative; width:100%; padding:18px 22px}
+.nav-left{display:flex; gap:14px; align-items:center}
+.nav-right{position:absolute; right:22px; top:18px; display:flex; gap:12px}
+.nav-btn{background:var(--btn-yellow); border:3px solid var(--brown); border-radius:14px; padding:10px 12px; font-size:20px; box-shadow:4px 4px 0 var(--brown); cursor:pointer}
+.nav-btn:active{transform:translateY(1px)}
+.back-btn{position:absolute; left:22px; top:92px; background:#FFE29A}
+.hearts{position:absolute; right:22px; top:18px; background:var(--pink); border:3px solid var(--brown); border-radius:16px; padding:6px 14px; font-weight:800; box-shadow:4px 4px 0 var(--brown)}
+
+/* PANEL */
+.panel{width:min(1120px, 92vw); margin:90px auto 50px; background:var(--panel); border:4px solid var(--brown); border-radius:24px; box-shadow:6px 6px 0 var(--brown); padding:40px 48px}
+.title{font-size:42px; text-align:center; margin:0 0 28px; text-shadow:0 5px 0 rgba(123,75,42,0.15)}
+
+.editor{display:grid; grid-template-columns:420px 1fr; gap:40px; align-items:start}
+
+/* PHOTO PICKER */
+.photo-card{background:#
+DDE5FF; border:4px solid var(--brown); border-radius:22px; width:100%; aspect-ratio:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; box-shadow:6px 6px 0 var(--brown); position:relative; overflow:hidden}
+.photo-card img{width:100%; height:100%; object-fit:cover}
+.photo-card .camera{font-size:48px}
+.photo-card .label{font-weight:800}
+.photo-card input{display:none}
+.photo-card .overlay{position:absolute; inset:0; background:transparent; pointer-events:none}
+
+/* ACCESSORIES */
+.group-title{font-size:28px; margin:8px 0 14px}
+.access-grid{display:grid; grid-template-columns:repeat(3, 130px); gap:18px}
+.tile{height:130px; width:130px; border:4px solid var(--brown); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:48px; box-shadow:6px 6px 0 var(--brown); cursor:pointer; user-select:none}
+.tile.blue{background:var(--tile-blue)}
+.tile.yellow{background:var(--tile-yellow)}
+.tile.pink{background:var(--tile-pink)}
+.tile.green{background:var(--tile-green)}
+.tile.red{background:#F4A6A6}
+.tile.selected{outline:5px solid rgba(123,75,42,.35)}
+
+/* NAME INPUT */
+.field{margin-top:26px}
+.field label{display:block; font-weight:900; margin-bottom:6px}
+.field input{width:100%; height:46px; border:4px solid var(--brown); border-radius:26px; padding:0 18px; font-size:18px; box-shadow:6px 6px 0 var(--brown); outline:none}
+.field input::placeholder{color:#8e6a54; opacity:.6}
+
+/* NEXT BUTTON (right side like screenshot) */
+.next{position:fixed; right:42px; top:170px; background:var(--tile-green); border:4px solid var(--brown); border-radius:16px; width:64px; height:64px; display:grid; place-items:center; box-shadow:6px 6px 0 var(--brown); font-size:26px; cursor:pointer}
+
+/* ===== Stickers / accessories on top of photo ===== */
+.sticker{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform-origin:center center;
+  font-size:60px;
+  cursor:move;
+  user-select:none;
+  pointer-events:auto;
+}
+.sticker.selected{
+  outline:2px dashed rgba(123,75,42,0.8);
+  outline-offset:4px;
+}
+.sticker-handle{
+  position:absolute;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:#FFE7A8;
+  border:2px solid var(--brown);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  cursor:pointer;
+  pointer-events:auto;
+}
+.sticker-handle.rotate{
+  top:-22px;
+  left:50%;
+  transform:translateX(-50%);
+}
+.sticker-handle.scale{
+  right:-22px;
+  bottom:-22px;
+}
+.sticker-handle.delete{
+  top:-22px;
+  right:-22px;
+  background:#F4B3BE;
+}
+</style>
+</head>
+<body>
+<!-- NAV -->
+<header class="navbar">
+<div class="nav-left">
+<button class="nav-btn" title="Home">🏠</button>
+<button class="nav-btn" title="Settings">⚙️</button>
+</div>
+<div class="hearts">❤️ 100</div>
+<button class="nav-btn back-btn" title="Back">↩️</button>
+</header>
+
+<!-- MAIN PANEL -->
+<main class="panel">
+<h1 class="title">Create Your Character!</h1>
+<section class="editor">
+  <!-- LEFT: photo picker -->
+  <label class="photo-card" id="photoCard">
+    <input type="file" id="photoInput" accept="image/*" />
+    <div class="camera">📷</div>
+    <div class="label">Add Photo</div>
+    <div class="overlay" title="Upload an image"></div>
+  </label>
+
+  <!-- RIGHT: accessories + name field -->
+  <div>
+    <h3 class="group-title">Pick Accessories!</h3>
+    <div class="access-grid" id="accessGrid">
+      <div class="tile blue" data-key="hat">🎩</div>
+      <div class="tile yellow" data-key="glasses">🤓</div>
+      <div class="tile pink" data-key="bow">🎀</div>
+      <div class="tile yellow" data-key="crown">👑</div>
+      <div class="tile green" data-key="star">⭐</div>
+      <div class="tile red" data-key="heart">❤️</div>
+    </div>
+    <div class="field">
+      <label for="nameInput">Name:</label>
+      <input id="nameInput" type="text" placeholder="Enter name..." />
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- Next button on the right like the screenshot -->
+<button class="next" id="nextBtn" title="Next">➡️</button>
+
+<script>
+/* -----------------------
+   Photo upload + camera
+   ----------------------- */
+
+const photoCard = document.getElementById('photoCard');
+const photoInput = document.getElementById('photoInput');
+const cameraIcon = photoCard.querySelector('.camera');
+const labelText = photoCard.querySelector('.label');
+
+photoInput.setAttribute('capture','user'); // allow live photo on mobile
+
+let photoImg = null;        // <img> element
+let accessoryLayer = null;  // container for stickers
+
+// Always let you change the photo
+photoCard.addEventListener('click', () => {
+  photoInput.click();
+});
+
+// Handle file selection
+photoInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    if (!photoImg) {
+      photoImg = document.createElement('img');
+      // insert image behind camera/text
+      photoCard.insertBefore(photoImg, cameraIcon);
+    }
+
+    // if there were stickers, clear them when changing photo
+    if (accessoryLayer) {
+      accessoryLayer.innerHTML = '';
+    }
+
+    photoImg.src = ev.target.result;
+    cameraIcon.style.display = 'none';
+    labelText.textContent = 'Tap to change photo';
+    labelText.style.display = 'block';
+
+    // create accessories layer once
+    if (!accessoryLayer) {
+      accessoryLayer = document.createElement('div');
+      accessoryLayer.id = 'accessoryLayer';
+      accessoryLayer.style.position = 'absolute';
+      accessoryLayer.style.inset = '0';
+      accessoryLayer.style.pointerEvents = 'auto';
+      photoCard.appendChild(accessoryLayer);
+    }
+  };
+  reader.readAsDataURL(file);
+});
+
+/* -----------------------
+   Accessories as stickers
+   ----------------------- */
+
+const accessGrid = document.getElementById('accessGrid');
+const tiles = accessGrid.querySelectorAll('.tile');
+
+let activeSticker = null;
+let dragMode = null; // 'move' | 'rotate' | 'scale'
+let dragStart = { x: 0, y: 0 };
+let original = { x: 0, y: 0, scale: 1, rotation: 0 };
+
+function setStickerTransform(sticker) {
+  const x = parseFloat(sticker.dataset.x || '0');
+  const y = parseFloat(sticker.dataset.y || '0');
+  const scale = parseFloat(sticker.dataset.scale || '1');
+  const rotation = parseFloat(sticker.dataset.rotation || '0');
+  sticker.style.transform = `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`;
+}
+
+function selectSticker(sticker) {
+  if (!accessoryLayer) return;
+  const stickers = accessoryLayer.querySelectorAll('.sticker');
+  stickers.forEach(s => s.classList.remove('selected'));
+  sticker.classList.add('selected');
+  activeSticker = sticker;
+  sticker.style.zIndex = Date.now().toString();
+}
+
+function createSticker(emoji) {
+  if (!accessoryLayer) return; // require a photo first
+
+  const sticker = document.createElement('div');
+  sticker.className = 'sticker selected';
+  sticker.textContent = emoji;
+
+  sticker.dataset.x = '0';
+  sticker.dataset.y = '0';
+  sticker.dataset.scale = '1';
+  sticker.dataset.rotation = '0';
+
+  const rect = accessoryLayer.getBoundingClientRect();
+  sticker.style.left = rect.width / 2 + 'px';
+  sticker.style.top = rect.height / 2 + 'px';
+
+  const rotateHandle = document.createElement('div');
+  rotateHandle.className = 'sticker-handle rotate';
+  rotateHandle.textContent = '⟲';
+
+  const scaleHandle = document.createElement('div');
+  scaleHandle.className = 'sticker-handle scale';
+  scaleHandle.textContent = '⇱';
+
+  const deleteHandle = document.createElement('div');
+  deleteHandle.className = 'sticker-handle delete';
+  deleteHandle.textContent = '✕';
+
+  sticker.appendChild(rotateHandle);
+  sticker.appendChild(scaleHandle);
+  sticker.appendChild(deleteHandle);
+
+  accessoryLayer.appendChild(sticker);
+  setStickerTransform(sticker);
+  selectSticker(sticker);
+
+  function startDrag(evt, mode) {
+    evt.preventDefault();
+    dragMode = mode;
+    activeSticker = sticker;
+
+    const stickerRect = sticker.getBoundingClientRect();
+    const clientX = evt.clientX;
+    const clientY = evt.clientY;
+
+    dragStart.x = clientX;
+    dragStart.y = clientY;
+
+    original.x = parseFloat(sticker.dataset.x || '0');
+    original.y = parseFloat(sticker.dataset.y || '0');
+    original.scale = parseFloat(sticker.dataset.scale || '1');
+    original.rotation = parseFloat(sticker.dataset.rotation || '0');
+
+    const centerX = stickerRect.left + stickerRect.width / 2;
+    const centerY = stickerRect.top + stickerRect.height / 2;
+    sticker.dataset.centerX = centerX;
+    sticker.dataset.centerY = centerY;
+
+    window.addEventListener('mousemove', onDragMove);
+    window.addEventListener('mouseup', endDrag);
+  }
+
+  sticker.addEventListener('mousedown', (e) => {
+    // delete click
+    if (e.target === deleteHandle) {
+      e.stopPropagation();
+      sticker.remove();
+      activeSticker = null;
+      return;
+    }
+
+    selectSticker(sticker);
+    if (e.target === rotateHandle) {
+      startDrag(e, 'rotate');
+    } else if (e.target === scaleHandle) {
+      startDrag(e, 'scale');
+    } else {
+      startDrag(e, 'move');
+    }
+  });
+}
+
+function onDragMove(e) {
+  if (!activeSticker || !dragMode) return;
+
+  const clientX = e.clientX;
+  const clientY = e.clientY;
+  const dx = clientX - dragStart.x;
+  const dy = clientY - dragStart.y;
+
+  if (dragMode === 'move') {
+    activeSticker.dataset.x = (original.x + dx).toString();
+    activeSticker.dataset.y = (original.y + dy).toString();
+  } else if (dragMode === 'scale') {
+    const cx = parseFloat(activeSticker.dataset.centerX);
+    const cy = parseFloat(activeSticker.dataset.centerY);
+    const initialDist = Math.hypot(dragStart.x - cx, dragStart.y - cy);
+    const currentDist = Math.hypot(clientX - cx, clientY - cy);
+    const scaleFactor = currentDist / (initialDist || 1);
+    activeSticker.dataset.scale = Math.max(0.3, original.scale * scaleFactor).toString();
+  } else if (dragMode === 'rotate') {
+    const cx = parseFloat(activeSticker.dataset.centerX);
+    const cy = parseFloat(activeSticker.dataset.centerY);
+    const initialAngle = Math.atan2(dragStart.y - cy, dragStart.x - cx);
+    const currentAngle = Math.atan2(clientY - cy, clientX - cx);
+    const delta = currentAngle - initialAngle;
+    const degrees = original.rotation + (delta * 180 / Math.PI);
+    activeSticker.dataset.rotation = degrees.toString();
+  }
+
+  setStickerTransform(activeSticker);
+}
+
+function endDrag() {
+  dragMode = null;
+  window.removeEventListener('mousemove', onDragMove);
+  window.removeEventListener('mouseup', endDrag);
+}
+
+window.addEventListener('mousemove', onDragMove);
+
+// click accessory tiles to add stickers
+accessGrid.addEventListener('click', (e) => {
+  const tile = e.target.closest('.tile');
+  if (!tile) return;
+  if (!photoImg) return; // need a photo first
+
+  tiles.forEach(t => t.classList.remove('selected'));
+  tile.classList.add('selected');
+
+  const emoji = tile.textContent.trim();
+  createSticker(emoji);
+});
+
+/* -----------------------
+   Back Button Behavior
+   ----------------------- */
+
+const backBtn = document.querySelector('.back-btn');
+
+if (backBtn) {
+  backBtn.addEventListener('click', () => {
+    window.location.href = "profile.html"; // ← go back to Profile Page
+  });
+}
+</script>
+</body>
+</html>
